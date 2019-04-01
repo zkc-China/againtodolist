@@ -27,7 +27,7 @@
     <div class="todolist">
       <div class="listinfo">
         <ul>
-          <li v-for="item in todolist" :key="item.id">
+          <li v-for="item in showtodolist" :key="item.id" >
             <div v-show="!item.edit">
               <input type="checkbox" class="todoCheck" v-model="item.state">
               <span
@@ -51,13 +51,13 @@
       </div>
       <div class="listbutton" v-show="todolist.length">
         <span v-show="todolist.length">{{todolist.filter(item => item.state).length}} items left</span>
-        <button v-on:click="showtodolist('all')">All</button>
-        <button v-on:click="showtodolist('Active')">Active</button>
-        <button v-on:click="showtodolist('Completed')">Completed</button>
+        <button v-on:click="seetodolist('all')">All</button>
+        <button v-on:click="seetodolist('Active')">Active</button>
+        <button v-on:click="seetodolist('Completed')">Completed</button>
         <button
           class="cleartodo"
           @click="cleartodos()"
-          v-show="todolist.some(item => !item.state)"
+          v-show="this.$store.getters.all.some(item => !item.state)"
         >Clear completed</button>
       </div>
     </div>
@@ -72,29 +72,36 @@ export default {
       newtodo: "",
       todolist: [],
       changetodo: "",
-      allchecked: false
+      allchecked: false,
+      type:'all',
     };
+  },
+  computed: {
+    showtodolist: function() {
+        switch(this.type){
+            case 'Active':
+            return this.$store.getters.active
+            break;
+            case 'Completed':
+            return this.$store.getters.completed
+            break;
+            case 'all':
+            return this.$store.getters.all
+            break;
+            default:
+             return this.$store.getters.all
+            break;
+        }
+    }
   },
   store,
   mounted() {
     this.getData();
-    console.log("asdasdad");
   },
   methods: {
-    showtodolist: function(type) {
-      console.log(type);
-      switch (type) {
-        case "Active":
-          return this.todolist.filter(item => !item.state);
-          break;
-        case "Completed":
-          return this.todolist.filter(item => item.state);
-          break;
-        default:
-          return this.todolist;
-          break;
-      }
-    },
+      seetodolist:function(type){
+          this.type = type
+      },
     getData: function() {
       this.todolist = this.$store.state.todolist;
       this.allchecked = this.$store.state.todolist.some(item => item.state);
@@ -116,7 +123,6 @@ export default {
       localStorage.setItem("todolist", JSON.stringify(this.todolist));
     },
     cleartodos: function(info) {
-      console.log("123456");
       this.$store.commit("delectodoed");
     },
     activetodolist: function() {
@@ -126,7 +132,7 @@ export default {
       // return this.$store.getters.active.length + "items left"
     },
     changetodoinfo: function(todoinfo) {
-      if (todoinfo.info) {
+      if (todoinfo.info.replace(/^\s+|\s+$/g, "")) {
         todoinfo.edit = false;
         this.changetodo = null;
         this.$store.commit("changetodo", todoinfo.info);
@@ -137,16 +143,6 @@ export default {
     }
   },
   watch: {
-    // todolist: function() {
-    //   console.log(this.todolist);
-    //   localStorage.setItem("todolist", JSON.stringify(this.todolist));
-    //   console.log(this.allchecked);
-    //   this.allchecked = this.$store.state.todolist.some(item => item.state);
-    //   console.log(this.allchecked);
-    // },
-    // allchecked: function() {
-    //   this.todolist.forEach(item => (item.state = !this.allchecked));
-    // }
     todolist: {
       deep: true,
       handler: function() {
@@ -270,9 +266,10 @@ li {
   white-space: pre-line;
   word-break: break-all;
 }
-.todolist .listinfo li:hover > bottom {
+.todolist .listinfo li:hover > .bottom {
   display: block;
 }
+
 .todolist .listinfo .delete {
   position: absolute;
   background: rgba(0, 0, 0, 0);
@@ -288,6 +285,7 @@ li {
   margin-bottom: 11px;
   outline: none;
   opacity: 0.5;
+  display: none;
 }
 .todolist .listinfo .delete::after {
   content: "x";
@@ -295,6 +293,9 @@ li {
 
 .todolist .listinfo .delete:hover {
   opacity: 1;
+}
+.todolist .listinfo li:hover .delete{
+    display: block;
 }
 .todolist .listinfo .userChangeTodo {
   width: 499px;

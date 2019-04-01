@@ -11,7 +11,7 @@ const store  = new Vuex.Store({
             state.todolist.push(
                 {'info':info,'state':true,'edit':false}
             );
-            console.log(this.todolist)
+            console.log(state.todolist)
         },
         delectodo(state,info){
             let _index;
@@ -32,7 +32,7 @@ const store  = new Vuex.Store({
         delectodoed:function(state){
             console.log(state.todolist.filter(item => item.state))
             const result = state.todolist.filter(item => item.state);
-            state.todolist = [];
+            state.todolist = result;
         },
         todostateAll(state){
             state.todolist.forEach(item => item.state = !state.allchecked)
@@ -58,9 +58,7 @@ const store  = new Vuex.Store({
             return state.todolist.filter((item) => item.state)
         },
         completed:function(state){
-            return state.todolist.filter(function(item){
-                return !item.state
-            })
+            return state.todolist.filter((item) => !item.state)
         },
         all:function(state){
             return state.todolist
