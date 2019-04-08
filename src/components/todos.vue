@@ -126,10 +126,7 @@ export default {
       this.$store.commit("delectodoed");
     },
     activetodolist: function() {
-      // console.log('1111')
-      // console.log(this.$store.getters.donetodos);
-      // console.log(this.$store.getters.active);
-      // return this.$store.getters.active.length + "items left"
+      
     },
     changetodoinfo: function(todoinfo) {
       if (todoinfo.info.replace(/^\s+|\s+$/g, "")) {
@@ -163,6 +160,13 @@ export default {
     }
   }
 };
+
+// var ss = [1,9,2,8,3,7,4,6]
+// ss.map(function(item,index){
+//   if(item > 5){
+//     ss.splice(index,1)
+//   }
+// })
 </script>
 
 <style scoped>

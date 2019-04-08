@@ -5,6 +5,7 @@ vue.use(Vuex)
 const store  = new Vuex.Store({
     state:{
         todolist:JSON.parse(localStorage.getItem('todolist') || '[]'),
+        
     },
     mutations:{
         addtodo(state,info){
@@ -30,12 +31,19 @@ const store  = new Vuex.Store({
             })
         },
         delectodoed:function(state){
-            console.log(state.todolist.filter(item => item.state))
-            const result = state.todolist.filter(item => item.state);
-            state.todolist = result;
+            // console.log(state.todolist.filter(item => item.state))
+            // const result = state.todolist.filter(item => item.state);
+            // state.todolist = result;
+            // if(state.todolist.some(item => item.state)){
+            //     state.map(function(item,index){
+            //     })
+            // }
+            state.todolist = state.todolist.filter(item => item.state);
+            localStorage.setItem("todolist", JSON.stringify(state.todolist));
         },
         todostateAll(state){
-            state.todolist.forEach(item => item.state = !state.allchecked)
+            state.todolist.forEach(item => item.state = !state.allchecked);
+            
         },
         changetodo(state,info){
             state.todolist.map(function(item){
