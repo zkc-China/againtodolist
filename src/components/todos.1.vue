@@ -29,7 +29,7 @@
         <ul>
           <li v-for="item in showtodolist" :key="item.id" >
             <div v-show="!item.edit">
-              <input type="checkbox" class="todoCheck" v-model="item.state" >
+              <input type="checkbox" class="todoCheck" v-model="item.state">
               <span
                 v-html="item.info"
                 v-bind:class="{finshtodo: !item.state }"
@@ -57,7 +57,7 @@
         <button
           class="cleartodo"
           @click="cleartodos()"
-          
+          v-show="this.$store.getters.all.some(item => !item.state)"
         >Clear completed</button>
       </div>
     </div>
@@ -65,7 +65,6 @@
 </template>
 <script>
 import store from "./../store/index.js";
-import axios from 'axios'
 export default {
   data() {
     return {
@@ -104,7 +103,6 @@ export default {
           this.type = type
       },
     getData: function() {
-      this.$store.dispatch("getTodolistInfo")
       this.todolist = this.$store.state.todolist;
       this.allchecked = this.$store.state.todolist.some(item => item.state);
     },
@@ -114,15 +112,18 @@ export default {
     },
     addtodo: function() {
       if (this.newtodo.replace(/^\s+|\s+$/g, "")) {
-        this.$store.dispatch("addTasktolist", this.newtodo);
+        this.$store.commit("addtodo", this.newtodo);
         this.newtodo = "";
       }
     },
     delect: function(info) {
-      this.$store.dispatch("delectodo", info);
+      this.$store.commit("delectodo", info);
+    },
+    commitlocalstogre: function() {
+      localStorage.setItem("todolist", JSON.stringify(this.todolist));
     },
     cleartodos: function(info) {
-      this.$store.dispatch("delectodoed");
+      this.$store.commit("delectodoed");
     },
     activetodolist: function() {
       
@@ -131,9 +132,9 @@ export default {
       if (todoinfo.info.replace(/^\s+|\s+$/g, "")) {
         todoinfo.edit = false;
         this.changetodo = null;
-        this.$store.dispatch("changetodo", todoinfo.info);
+        this.$store.commit("changetodo", todoinfo.info);
       } else {
-        this.$store.dispatch("delectodo", todoinfo.info);
+        this.$store.commit("delectodo", todoinfo.info);
       }
       console.log("unfouce");
     }
@@ -142,11 +143,7 @@ export default {
     todolist: {
       deep: true,
       handler: function() {
-        console.log('watch')
-        console.log(this.todolist)
-        // this.$store.dispatch("postDataserver");
-        // this.$store.dispatch("delectodo", todoinfo.info);
-        // localStorage.setItem("todolist", JSON.stringify(this.todolist));
+        localStorage.setItem("todolist", JSON.stringify(this.todolist));
       },
       allchecked: function() {
         this.todolist.forEach(item => (item.state = !this.allchecked));
@@ -164,6 +161,12 @@ export default {
   }
 };
 
+// var ss = [1,9,2,8,3,7,4,6]
+// ss.map(function(item,index){
+//   if(item > 5){
+//     ss.splice(index,1)
+//   }
+// })
 </script>
 
 <style scoped>

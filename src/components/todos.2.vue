@@ -27,37 +27,30 @@
     <div class="todolist">
       <div class="listinfo">
         <ul>
-          <li v-for="item in showtodolist" :key="item.id" >
+          <li v-for="item in todolist" :key="item.id" >
             <div v-show="!item.edit">
-              <input type="checkbox" class="todoCheck" v-model="item.state" >
+              <input type="checkbox" class="todoCheck" v-model="item.state">
               <span
                 v-html="item.info"
                 v-bind:class="{finshtodo: !item.state }"
-                @dblclick="change_todo(item)"
               ></span>
-              <button class="delete" @click="delect(item.info)"></button>
             </div>
             <input
               type="text"
               class="userChangeTodo"
               v-model="item.info"
-              v-focus=" item == changetodo"
               v-show="item.edit"
-              @blur="changetodoinfo(item)"
-              v-on:change="changetodoinfo(item)"
             >
           </li>
         </ul>
       </div>
       <div class="listbutton" v-show="todolist.length">
         <span v-show="todolist.length">{{todolist.filter(item => item.state).length}} items left</span>
-        <button v-on:click="seetodolist('all')">All</button>
-        <button v-on:click="seetodolist('Active')">Active</button>
-        <button v-on:click="seetodolist('Completed')">Completed</button>
+        <button >All</button>
+        <button v-on:click="postinfo()">Active</button>
+        <button v-on:click="postinfo()">Completed</button>
         <button
           class="cleartodo"
-          @click="cleartodos()"
-          
         >Clear completed</button>
       </div>
     </div>
@@ -65,105 +58,60 @@
 </template>
 <script>
 import store from "./../store/index.js";
-import axios from 'axios'
+import Axios from 'axios';
 export default {
   data() {
     return {
       title: "todos",
       newtodo: "",
-      todolist: [],
+      todolist: [{'info':'wwwww','state':true,'edit':false},{'info':'qqqqq','state':true,'edit':false}],
       changetodo: "",
       allchecked: false,
       type:'all',
     };
   },
   computed: {
-    showtodolist: function() {
-        switch(this.type){
-            case 'Active':
-            return this.$store.getters.active
-            break;
-            case 'Completed':
-            return this.$store.getters.completed
-            break;
-            case 'all':
-            return this.$store.getters.all
-            break;
-            default:
-             return this.$store.getters.all
-            break;
-        }
-    }
+    
   },
   store,
   mounted() {
-    this.getData();
+    this.todoinfo();
   },
   methods: {
-      seetodolist:function(type){
-          this.type = type
-      },
-    getData: function() {
-      this.$store.dispatch("getTodolistInfo")
-      this.todolist = this.$store.state.todolist;
-      this.allchecked = this.$store.state.todolist.some(item => item.state);
-    },
-    change_todo: function(info) {
-      info.edit = true;
-      this.changetodo = info;
-    },
-    addtodo: function() {
-      if (this.newtodo.replace(/^\s+|\s+$/g, "")) {
-        this.$store.dispatch("addTasktolist", this.newtodo);
-        this.newtodo = "";
+     todoinfo:function(){
+        Axios.get('http://localhost:3030/getodos/?todos')
+       .then(req => this.todolist = req.data);
+     },
+      postinfo:function(){
+        console.log(this.todolist)
+        console.log(JSON.stringify(this.todolist))
+        Axios({
+          url:'http://localhost:3030/todos',
+          method:"post",
+          data:JSON.stringify(this.todolist),
+        })
+          .then(function(response){
+            console.log(response)
+          })
+          .catch(function(error){
+            console.log(error)
+          })
       }
-    },
-    delect: function(info) {
-      this.$store.dispatch("delectodo", info);
-    },
-    cleartodos: function(info) {
-      this.$store.dispatch("delectodoed");
-    },
-    activetodolist: function() {
-      
-    },
-    changetodoinfo: function(todoinfo) {
-      if (todoinfo.info.replace(/^\s+|\s+$/g, "")) {
-        todoinfo.edit = false;
-        this.changetodo = null;
-        this.$store.dispatch("changetodo", todoinfo.info);
-      } else {
-        this.$store.dispatch("delectodo", todoinfo.info);
-      }
-      console.log("unfouce");
-    }
   },
   watch: {
-    todolist: {
-      deep: true,
-      handler: function() {
-        console.log('watch')
-        console.log(this.todolist)
-        // this.$store.dispatch("postDataserver");
-        // this.$store.dispatch("delectodo", todoinfo.info);
-        // localStorage.setItem("todolist", JSON.stringify(this.todolist));
-      },
-      allchecked: function() {
-        this.todolist.forEach(item => (item.state = !this.allchecked));
-      }
-    }
+    
   },
   directives: {
-    focus: {
-      componentUpdated: function(el, bing) {
-        if (bing.value) {
-          el.focus();
-        }
-      }
-    }
+   
   }
 };
 
+// var ss = [1,9,2,8,3,7,4,6]
+// ss.map(function(item,index){
+//   if(item > 5){
+//     ss.splice(index,1)
+//   }
+// })
 </script>
 
 <style scoped>
